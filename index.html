@@ -1,20 +1,118 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>JSON Tools</title>
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,sans-serif;background:#0d1117;color:#c9d1d9;padding:30px 20px}
-h1{text-align:center;margin-bottom:20px;color:#58a6ff}.tools{max-width:900px;margin:0 auto}
-.btns{display:flex;gap:10px;margin-bottom:15px;flex-wrap:wrap}
-.btn{background:#21262d;color:#c9d1d9;border:1px solid #30363d;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:0.9rem}
-.btn:hover{background:#30363d}.btn.primary{background:#238636;color:#fff;border-color:#238636}
-textarea{width:100%;height:350px;background:#161b22;color:#c9d1d9;border:1px solid #30363d;border-radius:8px;padding:15px;font-family:monospace;font-size:13px;resize:vertical}
-.error{color:#f85149;margin-top:10px}.success{color:#3fb950;margin-top:10px}</style></head>
-<body><div class="tools"><h1>🔧 JSON Tools</h1><div class="btns">
-<button class="btn primary" onclick="fmt()">Format</button><button class="btn" onclick="mini()">Minify</button>
-<button class="btn" onclick="valid()">Validate</button><button class="btn" onclick="copy()">Copy</button>
-<button class="btn" onclick="clear()">Clear</button></div>
-<textarea id="j" placeholder='Paste JSON here...'>{"name":"Bot Army","version":"1.0","bots":12,"active":true}</textarea>
-<div id="msg"></div></div>
-<script>const $=id=>document.getElementById(id);const m=(t,c)=>{$('msg').innerHTML=`<p class="${c}">${t}</p>`}
-function fmt(){try{$('j').value=JSON.stringify(JSON.parse($('j').value),null,2);m('✅ Formatted!','success')}catch(e){m('❌ '+e.message,'error')}}
-function mini(){try{$('j').value=JSON.stringify(JSON.parse($('j').value));m('✅ Minified!','success')}catch(e){m('❌ '+e.message,'error')}}
-function valid(){try{JSON.parse($('j').value);m('✅ Valid JSON!','success')}catch(e){m('❌ '+e.message,'error')}}
-function copy(){navigator.clipboard.writeText($('j').value);m('📋 Copied!','success')}
-function clear(){$('j').value='';m('','')}</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JSON Formatter | Isaac's Toolkit</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f0f;--panel:#1a1a1a;--border:#2a2a2a;--text:#eaeaea;--dim:#888;--accent:#00ff9f;--glow:rgba(0,255,159,.2);--font:'JetBrains Mono',monospace;--radius:8px}
+html{font-family:var(--font);background:var(--bg);color:var(--text);font-size:15px}
+body{min-height:100vh;display:flex;flex-direction:column}
+
+.topbar{position:sticky;top:0;z-index:50;background:rgba(15,15,15,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);padding:10px 20px;display:flex;align-items:center;justify-content:space-between}
+.topbar-title{font-size:.85rem;font-weight:600}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.version{font-size:.62rem;padding:2px 7px;border-radius:4px;background:rgba(0,255,159,.08);border:1px solid rgba(0,255,159,.2);color:var(--accent)}
+.nav-link{font-size:.72rem;color:var(--dim);text-decoration:none;transition:color .2s}
+.nav-link:hover{color:var(--accent)}
+
+.container{max-width:900px;margin:0 auto;padding:32px 24px;flex:1}
+.section-tag{font-size:.65rem;color:var(--accent);text-transform:uppercase;letter-spacing:3px;margin-bottom:5px}
+.title{font-size:1.3rem;font-weight:700;margin-bottom:3px}
+.subtitle{font-size:.78rem;color:var(--dim);margin-bottom:16px}
+.line{width:28px;height:2px;background:var(--accent);margin-bottom:20px}
+
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:22px;transition:border-color .3s,box-shadow .3s}
+.panel:hover{border-color:rgba(0,255,159,.25);box-shadow:0 0 16px var(--glow)}
+
+.label{font-size:.72rem;color:var(--dim);margin-bottom:5px;display:block}
+.textarea{width:100%;min-height:180px;padding:14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);font-family:var(--font);font-size:.78rem;line-height:1.6;resize:vertical;outline:none;transition:border-color .2s,box-shadow .2s}
+.textarea:focus{border-color:var(--accent);box-shadow:0 0 10px var(--glow)}
+.textarea::placeholder{color:var(--dim)}
+
+.output{background:#0a0a0a;border:1px solid var(--border);border-radius:var(--radius);padding:14px;font-size:.78rem;line-height:1.6;min-height:180px;word-break:break-all;white-space:pre-wrap;overflow-y:auto;max-height:400px}
+.output-bar{font-size:.68rem;color:var(--dim);margin-bottom:5px;display:flex;justify-content:space-between}
+
+.btn{display:inline-flex;align-items:center;gap:6px;font-family:var(--font);font-size:.75rem;font-weight:500;padding:9px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--bg);color:var(--text);cursor:pointer;transition:all .2s}
+.btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 10px var(--glow)}
+.btn-primary{background:rgba(0,255,159,.08);border-color:rgba(0,255,159,.25);color:var(--accent)}
+.btn-danger{border-color:rgba(255,95,87,.25);color:#ff5f57}
+.btn-danger:hover{background:rgba(255,95,87,.08)}
+.btn-group{display:flex;gap:8px;flex-wrap:wrap}
+
+.toast{position:fixed;bottom:20px;right:20px;z-index:999;background:var(--panel);border:1px solid var(--accent);border-radius:var(--radius);padding:10px 18px;font-size:.78rem;color:var(--accent);box-shadow:0 0 16px var(--glow);transform:translateY(80px);opacity:0;transition:all .3s}
+.toast.show{transform:translateY(0);opacity:1}
+
+footer{text-align:center;padding:28px 0;border-top:1px solid var(--border);font-size:.68rem;color:var(--dim)}
+@media(max-width:768px){.container{padding:20px 14px}}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+<div class="topbar-title">📝 JSON Formatter</div>
+<div class="topbar-right">
+<a href="https://mewmewmow.github.io/Portfolio/" class="nav-link">← Dashboard</a>
+<span class="version">v1.0.0</span>
+</div>
+</div>
+
+<div class="container">
+<div class="section-tag">Tool //</div>
+<h1 class="title">JSON Formatter</h1>
+<p class="subtitle">Paste JSON to format, validate, or minify.</p>
+<div class="line"></div>
+
+<div class="panel">
+<div style="margin-bottom:12px">
+<label class="label">Input JSON</label>
+<textarea class="textarea" id="jIn" placeholder='{"name":"Isaac","age":20}'></textarea>
+</div>
+
+<div class="btn-group" style="margin-bottom:16px">
+<button class="btn btn-primary" onclick="fmt()">✨ Format</button>
+<button class="btn" onclick="min()">📦 Minify</button>
+<button class="btn" onclick="val()">✅ Validate</button>
+<button class="btn" onclick="copy()">📋 Copy</button>
+<button class="btn btn-danger" onclick="clr()">🗑️ Clear</button>
+</div>
+
+<div>
+<div class="output-bar"><span>Output</span><span id="jStat" style="color:var(--dim)">—</span></div>
+<div class="output" id="jOut">Formatted JSON will appear here</div>
+</div>
+</div>
+</div>
+
+<footer>
+<div class="container">JSON Formatter v1.0.0 · Part of Isaac's Toolkit</div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const a={c:0};try{const s=JSON.parse(localStorage.getItem('jf_a'));a.c=s.c||0}catch(e){}
+function track(n){a.c++;localStorage.setItem('jf_a',JSON.stringify(a));console.log('[analytics]',n)}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+
+function fmt(){track('format');const v=document.getElementById('jIn').value.trim();if(!v){toast('Paste JSON first');return}
+try{const p=JSON.parse(v);document.getElementById('jOut').textContent=JSON.stringify(p,null,2);
+document.getElementById('jStat').textContent='Valid ✅';document.getElementById('jStat').style.color='var(--accent)';toast('Formatted')}
+catch(e){document.getElementById('jOut').textContent='Error: '+e.message;document.getElementById('jStat').textContent='Invalid ❌';document.getElementById('jStat').style.color='#ff5f57';toast('Invalid JSON')}}
+
+function min(){track('minify');try{const p=JSON.parse(document.getElementById('jIn').value.trim());document.getElementById('jOut').textContent=JSON.stringify(p);
+document.getElementById('jStat').textContent='Minified ✅';document.getElementById('jStat').style.color='var(--accent)';toast('Minified')}catch{toast('Invalid JSON')}}
+
+function val(){track('validate');try{JSON.parse(document.getElementById('jIn').value.trim());
+document.getElementById('jStat').textContent='Valid ✅';document.getElementById('jStat').style.color='var(--accent)';toast('Valid JSON')}
+catch(e){document.getElementById('jStat').textContent=e.message;document.getElementById('jStat').style.color='#ff5f57';toast('Invalid')}}
+
+function copy(){track('copy');const o=document.getElementById('jOut').textContent;if(o!=='Formatted JSON will appear here'){navigator.clipboard.writeText(o);toast('Copied!')}}
+
+function clr(){track('clear');document.getElementById('jIn').value='';document.getElementById('jOut').textContent='Formatted JSON will appear here';
+document.getElementById('jStat').textContent='—';document.getElementById('jStat').style.color='var(--dim)';toast('Cleared')}
+</script>
+</body>
+</html>
